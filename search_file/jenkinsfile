@@ -1,0 +1,33 @@
+pipeline {
+    agent any 
+
+    parameters {
+        string(name: 'FILE_EXTENSION', defaultValue: 'txt', description: 'Ekstensi file yang ingin dicari (misal: txt, log, etc.)')
+    }
+
+    stages {
+        stage('Search Files') {
+            steps {
+                script {
+                    // Mengambil nilai parameter ekstensi file
+                    def extension = params.FILE_EXTENSION
+
+                    // Menambahkan titik di depan ekstensi jika belum ada
+                    if (!extension.startsWith('.')) {
+                        extension = "." + extension
+                    }
+
+                    // Mencari file dengan ekstensi yang diberikan
+                    def files = sh(script: "find . -type f -name '*${extension}'", returnStdout: true).trim()
+
+                    // Menampilkan hasil
+                    if (files) {
+                        echo "File dengan ekstensi ${extension} yang ditemukan:\n${files}"
+                    } else {
+                        echo "Tidak ada file yang ditemukan dengan ekstensi ${extension}."
+                    }
+                }
+            }
+        }
+    }
+}
