@@ -1,0 +1,23 @@
+pipeline {
+    agent any 
+
+    triggers {
+        cron('H 0 * * *')
+    }
+
+    stages {
+        stage('Check Filesystem Sizes') {
+            steps {
+                script {
+                    try {
+                        def diskUsage = sh(script: "df -h", returnStdout: true).trim()
+                        echo "Filesystem sizes:\n${diskUsage}"
+                    } catch (Exception e) {
+                        echo "An error occurred during filesystem size check: ${e.message}"
+                        currentBuild.result = 'FAILURE'
+                    }
+                }
+            }
+        }
+    }
+}
