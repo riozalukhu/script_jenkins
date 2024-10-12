@@ -2,32 +2,37 @@ pipeline {
     agent any 
 
     parameters {
-        string(name: 'FILE_EXTENSION', defaultValue: 'txt', description: 'Ekstensi file yang ingin dicari (misal: txt, log, etc.)')
+        string(name: 'FILE_NAME', description: 'Nama file yang ingin dicari (misal: example, log, etc.)')
     }
 
     stages {
         stage('Search Files') {
             steps {
                 script {
-                    // Mengambil nilai parameter ekstensi file
-                    def extension = params.FILE_EXTENSION
+                    def fileName = params.FILE_NAME
 
-                    // Menambahkan titik di depan ekstensi jika belum ada
-                    if (!extension.startsWith('.')) {
-                        extension = "." + extension
-                    }
 
-                    // Mencari file dengan ekstensi yang diberikan
-                    def files = sh(script: "find . -type f -name '*${extension}'", returnStdout: true).trim()
-
-                    // Menampilkan hasil
-                    if (files) {
-                        echo "File dengan ekstensi ${extension} yang ditemukan:\n${files}"
-                    } else {
-                        echo "Tidak ada file yang ditemukan dengan ekstensi ${extension}."
+                    stage('Search File') {
+                        try {
+                            
+                            def files = sh(script: "find / -type f -name '*${fileName}.*' 2>/dev/null || true", returnStdout: true).trim()
+                            
+                            stage('Result Search') {
+                                if (files) {
+                                    echo "File(s) found with name containing '${fileName}':\n${files}"
+                                } else {
+                                    echo "No files found with name containing '${fileName}'."
+                                }
+                            }
+                        } catch (Exception e) {
+                            
+                            echo "An error occurred during file search: ${e.message}"
+                            currentBuild.result = 'FAILURE'
+                        }
                     }
                 }
             }
         }
     }
 }
+

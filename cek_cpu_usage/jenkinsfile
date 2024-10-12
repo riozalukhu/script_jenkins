@@ -2,12 +2,11 @@ pipeline {
     agent any
 
     environment {
-        CPU_THRESHOLD = "75"                    // Hardcoded CPU threshold
-        INTERVAL = "60"                         // Hardcoded interval (seconds)
+        CPU_THRESHOLD = "75"
+        INTERVAL = "60"                 
     }
 
     triggers {
-        // Cron to schedule the job to run every 3 hours
         cron('H */3 * * *')
     }
 
@@ -15,7 +14,7 @@ pipeline {
         stage('Monitor CPU Usage') {
             steps {
                 script {
-                    // Define the Bash script to monitor CPU usage
+                    
                     def monitorScript = """
                     #!/bin/bash
 
@@ -24,7 +23,7 @@ pipeline {
                         echo "\$cpu_usage"
                     }
 
-                    # Check CPU usage once
+                
                     cpu_usage=\$(get_cpu_usage)
 
                     if (( \$(echo "\$cpu_usage > ${CPU_THRESHOLD}" | bc -l) )); then
@@ -35,10 +34,11 @@ pipeline {
                     fi
                     """
                     
-                    // Run the script
+            
                     sh monitorScript
                 }
             }
         }
     }
 }
+
